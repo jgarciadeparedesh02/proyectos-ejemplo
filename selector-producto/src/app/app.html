@@ -1,0 +1,31 @@
+<h1>Selector de Productos</h1>
+
+<div class="main-container">
+  <div class="product-list-container">
+    <h2>Productos</h2>
+    <div class="product-list">
+      @for (product of products; track product.name) {
+        <app-product-thumbnail 
+          [product]="product" 
+          (productSelected)="onProductSelected($event)">
+        </app-product-thumbnail>
+      }
+    </div>
+  </div>
+
+  <div class="selected-product-container">
+    @if (selectedProduct) {
+      <div>
+        <h2>Producto Seleccionado:</h2>
+        <img 
+          [src]="selectedProduct.imageUrl" 
+          [alt]="selectedProduct.name" 
+          width="200" />
+        <h3>{{ selectedProduct.name }}</h3>
+        <p>{{ selectedProduct.price | currency }}</p>
+      </div>
+    } @else {
+      <p>Selecciona un producto de la lista.</p>
+    }
+  </div>
+</div>
