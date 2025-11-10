@@ -1,0 +1,37 @@
+div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s;
+}
+
+div:hover {
+  background-color: #f9f9f9;
+}
+
+span {
+  cursor: pointer;
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #c0392b;
+}
