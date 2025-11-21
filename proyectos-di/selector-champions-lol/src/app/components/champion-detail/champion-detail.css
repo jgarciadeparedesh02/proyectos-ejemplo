@@ -1,0 +1,118 @@
+.no-champion-selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #555;
+  font-size: 1.5rem;
+}
+
+.champion-detail-container {
+  color: #fff;
+}
+
+.champion-header {
+  position: relative;
+  text-align: center;
+}
+
+.champion-splash {
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+}
+
+.champion-title {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.champion-title h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #c4b5fd;
+}
+
+.champion-title h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #a5b4fc;
+}
+
+.champion-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.champion-stats h3, .champion-lore h3, .champion-spells h3, .skins-section h3 {
+  color: #818cf8;
+  border-bottom: 2px solid #818cf8;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.champion-stats ul {
+  list-style: none;
+  padding: 0;
+}
+
+.champion-stats li {
+  background: #1e1e2e;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.skins-button {
+  background-color: #818cf8;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s;
+}
+
+.skins-button:hover {
+  background-color: #6366f1;
+}
+
+.skins-section {
+  margin-top: 2rem;
+}
+
+.skins-grid, .spells-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.skin-card, .spell-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.skin-card img, .spell-card img {
+  width: 100%;
+  display: block;
+}
+
+.skin-name, .spell-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 5px;
+  text-align: center;
+  font-size: 0.9rem;
+}

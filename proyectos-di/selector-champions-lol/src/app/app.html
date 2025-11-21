@@ -1,0 +1,14 @@
+<div class="app-container">
+  <aside class="sidebar">
+    <app-champion-list
+      [champions]="champions"
+      (selectChampion)="onChampionSelected($event)">
+    </app-champion-list>
+  </aside>
+
+  <main class="main-content">
+    <app-champion-detail
+      [champion]="selectedChampion">
+    </app-champion-detail>
+  </main>
+</div>

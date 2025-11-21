@@ -1,0 +1,12 @@
+@if (champions.length === 0) {
+  <p>No se encontraron campeones 😢</p>
+} @else {
+  <div class="champion-grid">
+    @for (champion of champions; track champion.id) {
+      <div class="champion-card" (click)="onSelect(champion)">
+        <img [src]="champion.image.full" [alt]="champion.name">
+        <div class="champion-name">{{ champion.name }}</div>
+      </div>
+    }
+  </div>
+}

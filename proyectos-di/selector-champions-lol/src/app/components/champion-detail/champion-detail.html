@@ -1,0 +1,47 @@
+@if (!champion) {
+  <div class="no-champion-selected">
+    <p>Selecciona un campeón para ver sus detalles</p>
+  </div>
+} @else {
+  <div class="champion-detail-container">
+    <div class="champion-header">
+      <img [src]="champion.image.full" [alt]="champion.name" class="champion-splash">
+      <div class="champion-title">
+        <h1>{{ champion.name }}</h1>
+        <h2>{{ champion.title }}</h2>
+      </div>
+    </div>
+
+    <div class="champion-body">
+      <div class="champion-stats">
+        <h3>Estadísticas</h3>
+        <ul>
+          <li><strong>Ataque:</strong> {{ champion.info.attack }}</li>
+          <li><strong>Defensa:</strong> {{ champion.info.defense }}</li>
+          <li><strong>Magia:</strong> {{ champion.info.magic }}</li>
+          <li><strong>Dificultad:</strong> {{ champion.info.difficulty }}</li>
+        </ul>
+        <button (click)="showSkins = !showSkins" class="skins-button">Ver Skins</button>
+      </div>
+
+      <div class="champion-lore">
+        <h3>Lore</h3>
+        <p>{{ champion.lore }}</p>
+      </div>
+    </div>
+
+    @if (showSkins) {
+      <div class="skins-section">
+        <h3>Skins</h3>
+        <div class="skins-grid">
+          @for (skin of champion.skins; track skin.id) {
+            <div class="skin-card">
+              <img [src]="getSkinImageUrl(champion.id, skin.num)" [alt]="skin.name">
+              <div class="skin-name">{{ skin.name === 'default' ? champion.name : skin.name }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
