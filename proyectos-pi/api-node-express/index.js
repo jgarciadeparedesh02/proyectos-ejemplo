@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const db = require('./db');
 
 const app = express();
 const port = 3000;
@@ -8,41 +10,76 @@ const secretKey = 'your-secret-key';
 
 app.use(bodyParser.json());
 
-// Datos de ejemplo (en una app real esto vendría de una base de datos)
-const users = [
-  { id: 1, username: 'testuser', password: '123456' },
-  { id: 2, username: 'admin', password: 'admin123' }
-];
-
 // Public route
 app.get('/api/data', (req, res) => {
   res.json({ message: 'This is public data' });
 });
 
-// Login route (valida usuario y contraseña)
-app.post('/api/login', (req, res) => {
+// Register route
+app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
 
-  // Verificar que se envíen las credenciales
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password required' });
   }
 
-  // Buscar usuario
-  const user = users.find(u => u.username === username && u.password === password);
+  try {
+    // Check if user exists
+    const userCheck = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (userCheck.rows.length > 0) {
+      return res.status(409).json({ message: 'Username already exists' });
+    }
 
-  // Validar credenciales
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid username or password' });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert user
+    const newUser = await db.query(
+      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
+      [username, hashedPassword]
+    );
+
+    res.status(201).json({ message: 'User registered successfully', user: newUser.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error registering user' });
+  }
+});
+
+// Login route
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password required' });
   }
 
-  // Generar token
-  jwt.sign({ id: user.id, username: user.username }, secretKey, { expiresIn: '30m' }, (err, token) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error generating token' });
+  try {
+    // Find user
+    const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
-    res.json({ token });
-  });
+
+    // Validate password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    // Generate token
+    jwt.sign({ id: user.id, username: user.username }, secretKey, { expiresIn: '30m' }, (err, token) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error generating token' });
+      }
+      res.json({ token });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error logging in' });
+  }
 });
 
 // Protected route
