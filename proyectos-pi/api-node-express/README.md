@@ -21,7 +21,6 @@ api-node-express/
 ├── .env                        # Variables de entorno (no versionado)
 ├── .gitignore                  # Archivos excluidos del control de versiones
 ├── init_db.js                  # Inicializa la tabla de usuarios
-├── add_username_column.js      # Migración para añadir columna username
 ├── inspect_db.js               # Inspecciona la estructura de la BD
 └── test_api.js                 # Suite de pruebas automatizadas
 ```
@@ -74,11 +73,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 ```
 **Uso**: `node init_db.js`
-
-#### `add_username_column.js` - Script de Migración
-Añade la columna `username` a la tabla `users` si no existe. Útil para actualizar bases de datos existentes.
-
-**Uso**: `node add_username_column.js`
 
 #### `inspect_db.js` - Inspector de Base de Datos
 Consulta y muestra la estructura de la tabla `users`, incluyendo nombres de columnas y tipos de datos. Útil para debugging y verificación.
