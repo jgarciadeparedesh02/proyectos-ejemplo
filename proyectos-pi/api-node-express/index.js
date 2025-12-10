@@ -3,11 +3,13 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const db = require('./db');
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
 const secretKey = 'your-secret-key';
 
+app.use(cors());
 app.use(bodyParser.json());
 
 // Public route
