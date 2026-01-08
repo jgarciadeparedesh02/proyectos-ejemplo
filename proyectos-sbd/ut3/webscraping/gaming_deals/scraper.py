@@ -1,59 +1,56 @@
-import requests
-from bs4 import BeautifulSoup
+import time
+import random
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 
 def get_steam_deals():
     print("🎮 Buscando las mejores ofertas en Steam...")
     
-    # URL de los más vendidos con oferta
-    url = "https://store.steampowered.com/search/?specials=1&filter=topsellers"
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
-    # User-Agent más realista
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept-Language": "es-ES,es;q=0.9"
-    }
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     try:
-        # Añadimos cookies para evitar redirecciones o bloqueos básicos por región/edad
-        cookies = {'birthtime': '568022401', 'lastagecheckage': '1-0-1988'}
+        url = "https://store.steampowered.com/search/?specials=1&filter=topsellers"
+        driver.get(url)
         
-        response = requests.get(url, headers=headers, cookies=cookies, timeout=10)
-        response.raise_for_status()
+        # Esperar a que los resultados de búsqueda aparezcan
+        wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "search_result_row")))
         
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Encontrar el contenedor de resultados
-        search_results = soup.find('div', id='search_resultsRows')
-        if not search_results:
-            # Intentar otro selector si el anterior falla
-            search_results = soup.select_one('#search_resultsRows')
-            
-        if not search_results:
-            return []
-            
-        items = search_results.find_all('a', recursive=False)
+        # Obtener los elementos de los juegos
+        game_rows = driver.find_elements(By.CLASS_NAME, "search_result_row")
         
         deals = []
         
-        for item in items[:15]:
+        for row in game_rows[:15]: # Top 15
             try:
-                title = item.find('span', class_='title').text
+                title = row.find_element(By.CLASS_NAME, 'title').text
                 
                 # Descuento
-                discount_elem = item.find('div', class_='search_discount')
-                discount = discount_elem.text.strip() if discount_elem and discount_elem.text.strip() else "0%"
+                try:
+                    discount = row.find_element(By.CLASS_NAME, 'discount_pct').text
+                except:
+                    discount = "0%"
                 
                 # Precios
-                price_div = item.find('div', class_='search_price')
-                price_text = price_div.text.strip()
-                
-                # Limpieza de precio (Steam a veces pone el original y el rebajado juntos)
-                if "€" in price_text:
-                    parts = [p.strip() for p in price_text.split("€") if p.strip()]
-                    final_price = parts[-1] + "€" if parts else "N/A"
-                else:
-                    final_price = price_text
+                try:
+                    # Si hay descuento, buscamos el precio final
+                    final_price = row.find_element(By.CLASS_NAME, 'discount_final_price').text
+                except:
+                    # Si no hay descuento, buscamos el precio normal
+                    final_price = row.find_element(By.CLASS_NAME, 'search_price').text.strip()
 
                 deals.append({
                     "Juego": title,
@@ -68,6 +65,8 @@ def get_steam_deals():
     except Exception as e:
         print(f"❌ Error al realizar el scraping: {e}")
         return []
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
     steam_deals = get_steam_deals()
@@ -76,16 +75,8 @@ if __name__ == "__main__":
         print("\n🔥 Top 15 Ofertas Más Vendidas en Steam:")
         df = pd.DataFrame(steam_deals)
         print(df.to_string(index=False))
+        
         df.to_csv("ofertas_steam.csv", index=False, encoding='utf-8-sig')
         print("\n✅ Datos guardados en 'ofertas_steam.csv'")
     else:
-        print("⚠️ No se pudieron obtener ofertas en vivo.")
-        print("💡 Generando datos de ejemplo para demostración...")
-        example_data = [
-            {"Juego": "Elden Ring", "Descuento": "-40%", "Precio Final": "35,99€"},
-            {"Juego": "Cyberpunk 2077", "Descuento": "-50%", "Precio Final": "29,99€"},
-            {"Juego": "Hades II", "Descuento": "-10%", "Precio Final": "26,09€"}
-        ]
-        df = pd.DataFrame(example_data)
-        df.to_csv("ofertas_steam_ejemplo.csv", index=False, encoding='utf-8-sig')
-        print("✅ Ejemplo guardado en 'ofertas_steam_ejemplo.csv'")
+        print("📭 No se pudieron obtener ofertas reales. Steam podría estar bloqueando el acceso automatizado.")

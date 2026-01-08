@@ -5,18 +5,18 @@ Este script extrae las **mejores ofertas de videojuegos** de los "Top Sellers" e
 
 ## Tecnologías Utilizadas
 - **Python 3.10+**
-- **BeautifulSoup4**: Para extraer los títulos y precios del HTML.
-- **Requests**: Para manejar la comunicación con el servidor de Steam.
+- **Selenium**: Para navegar e interactuar con la web de Steam de forma realista.
+- **Webdriver-manager**: Gestiona automáticamente la instalación del driver de Chrome.
 - **Pandas**: Para formatear los resultados en una tabla clara.
 
 ## El reto de Steam
-Steam suele tener medidas de seguridad para evitar scrapers masivos. En este script, utilizamos **cookies de sesión simuladas** (como la verificación de edad) y **headers realistas** para que nuestra petición parezca la de un usuario normal navegando por la tienda.
+Steam suele tener medidas de seguridad para evitar scrapers masivos. En este script, utilizamos **Selenium** para simular un navegador real, lo que nos permite saltarnos las detecciones básicas que bloquean peticiones directas de librerías como `requests`.
 
 ## Cómo ejecutarlo
 
 1. **Instalar dependencias**:
    ```bash
-   pip install requests beautifulsoup4 pandas
+   pip install selenium webdriver-manager pandas
    ```
 
 2. **Ejecutar el script**:
