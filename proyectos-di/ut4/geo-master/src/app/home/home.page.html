@@ -1,0 +1,77 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="gradient">
+    <ion-title>
+      GeoMaster Explorer
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="getLocation()">
+        <ion-icon slot="icon-only" name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div id="map" class="map-container"></div>
+
+  <div class="info-overlay">
+    <ion-card class="geo-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="location" color="primary"></ion-icon>
+          Ubicación Actual
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>
+              <h3>Latitud</h3>
+              <p>{{ currentPos?.coords?.latitude || 'Buscando...' }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Longitud</h3>
+              <p>{{ currentPos?.coords?.longitude || 'Buscando...' }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Precisión</h3>
+              <ion-badge color="secondary">{{ currentPos?.coords?.accuracy?.toFixed(1) || 0 }}m</ion-badge>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="geo-card" *ngIf="history.length > 0">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="navigate" color="tertiary"></ion-icon>
+          Métricas de Viaje
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="stats-row">
+          <div class="stat-item">
+            <span class="stat-label">Puntos</span>
+            <span class="stat-value">{{ history.length }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Dist. Inicio</span>
+            <span class="stat-value">{{ getDistanceToStart() }}m</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="startTracking()" [disabled]="watchId">
+      <ion-icon name="recording"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
