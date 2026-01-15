@@ -1,195 +1,137 @@
-<p align="center"><br><img src="https://avatars3.githubusercontent.com/u/16580653?v=4" width="128" height="128" /></p>
+# Ionic 7 + Angular + SQLite Starter Template 🚀
 
-<h3 align="center">Ionic7/Angular SQLite Starter</h3>
-<p align="center"><strong><code>ionic7-angular-sqlite-starter</code></strong></p>
-<p align="center">Ionic7/Angular application demonstrating the use of the</p>
-<p align="center"><strong><code>@capacitor-community/sqlite</code></strong></p>
-<br>
-<p align="center"><strong><code>this app uses Capacitor 5</code></strong></p>
-<br>
-<p align="center">
-  <img src="https://img.shields.io/maintenance/yes/2023?style=flat-square" />
-  <a href="https://github.com/jepiqueau/ionic7-angular-sqlite-starter"><img src="https://img.shields.io/github/license/jepiqueau/ionic7-angular-sqlite-starter?style=flat-square" /></a>
-  <a href="https://github.com/jepiqueau/ionic7-angular-sqlite-starter"><img src="https://img.shields.io/github/package-json/v/jepiqueau/ionic7-angular-sqlite-starter/master?style=flat-square" /></a>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img src="https://img.shields.io/badge/all%20contributors-1-orange?style=flat-square" /></a>
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-</p>
+Este proyecto es una plantilla profesional para desarrollar aplicaciones híbridas utilizando **Ionic 7**, **Angular 16** y el plugin **@capacitor-community/sqlite**. Está diseñado para ser una base sólida que permite gestionar una base de datos local SQLite de forma persistente en múltiples plataformas (Android, iOS y Web).
 
-## Maintainers
+---
 
-| Maintainer        | GitHub                                    | Social |
-| ----------------- | ----------------------------------------- | ------ |
-| Quéau Jean Pierre | [jepiqueau](https://github.com/jepiqueau) |        |
+## 📋 Tabla de Contenidos
 
+1. [Características](#-características)
+2. [Arquitectura del Proyecto](#-arquitectura-del-proyecto)
+3. [Requisitos Previos](#-requisitos-previos)
+4. [Instalación](#-instalación)
+5. [Guía de Desarrollo (Paso a Paso)](#-guía-de-desarrollo-paso-a-paso)
+6. [Persistencia en la Web (WASM)](#-persistencia-en-la-web-wasm)
+7. [Despliegue en Android/iOS](#-despliegue-en-androidios)
+8. [Scripts Útiles](#-scripts-útiles)
 
-## Introduction
+---
 
-This application is a complete starter solution for Ionic 7 Angular 16 SQLite CRUD operations using @capacitor-community/sqlite plugin with Capacitor 5.
+## ✨ Características
 
-This application will implement the well known `Authors-Posts-Categories` SQLite database.
+- **Multiplataforma**: Funciona en Navegador (WASM), Android, iOS y Electron.
+- **SQLite Local**: Persistencia de datos robusta sin necesidad de internet.
+- **Inicialización Automática**: La base de datos se configura al arrancar la app.
+- **Estructura Modular**: Separación clara entre la lógica de UI y el acceso a datos.
 
-```ts
-PostData {
-  id!: number;
-  title!: string;
-  text!: string;
-  author!: Author;
-  categories!: Category[];
-}
+---
 
-Author {
-  id!: number;
-  name!: string;
-  email!: string;
-  birthday?: string;
-}
+## 🏗 Arquitectura del Proyecto
 
-Category {
-  id!: number;
-  name!: string;
-}
-```
+El proyecto utiliza una jerarquía de servicios para gestionar la base de datos de forma segura:
 
-Database schemas are defined using the `Incremental Upgrade Database Version` workflow in the folder `src/app/upgrades/author-posts/upgrade-statements` following the guidelines (https://github.com/capacitor-community/sqlite/blob/master/docs/IncrementalUpgradeDatabaseVersion.md).
+### 1. `SQLiteService` (`src/app/services/sqlite.service.ts`)
+Es el encargado de la conexión de bajo nivel. Detecta la plataforma, inicializa el plugin de Capacitor y gestiona la apertura de conexiones. También maneja el almacenamiento persistente en la web usando **WASM**.
 
-Initial data for database version 1 are provided in the file `src/app/mock-data/posts-categories-authors.ts`.
-
-Access to the @capacitor-community/sqlite plugin is made through the use of an angular service (`src/app/services/sqlite.service.ts`).
-
-`Authors-Posts-Categories` CRUD operations are accessible  through the use of an angular service (`src/app/services/author-posts.service.ts`).
-
-Initialization of the application is made in the angular service (`src/app/services/initialize.app.service.ts`) which instantiate the sqlite service, create database schemas and upload the mock data.
-
-In database version 2, `company` column was added to the `author` table.
-
-## Demonstrations
-
-[Demonstrations](https://jepiqueau.github.io/ionic7-angular-sqlite-starter/)
-
-
-## Installation
-
-To start building your App using this  App, clone this repo to a new directory:
-
-```bash
-git clone https://github.com/jepiqueau/ionic7-angular-sqlite-starter.git 
-cd ionic7-angular-sqlite-starter
-git remote rm origin
-```
-
- - then install it
-
-  ```bash
-  npm install
-
+### 2. `TaskService` (`src/app/services/task.service.ts`)
+Contiene la lógica de negocio de la aplicación (en este caso, una lista de tareas).
+- Define el esquema de la tabla:
+  ```sql
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    completed INTEGER DEFAULT 0
+  );
   ```
+- Expone métodos CRUD: `addTask()`, `loadTasks()`, `updateTask()`, `deleteTask()`.
 
- - if you use the Electron platform
+### 3. `AppModule` (`src/app/app.module.ts`)
+Utiliza un `APP_INITIALIZER` para llamar a `taskService.initializeFull()` antes de que la aplicación termine de cargar. Esto garantiza que la base de datos esté lista antes de que el usuario vea la pantalla principal.
 
-  ```bash
-  npm run electron:install
-  ```
+---
 
- - the capacitor config parameters are:
+## 🛠 Requisitos Previos
 
-  ```
-    "appId": "com.jeep.app.ionic7.angular.sqlite",
-    "appName": "ionic7-angular-sqlite-starter",
-  ```
+Antes de empezar, asegúrate de tener instalado:
 
-### Building Web Project
+- [Node.js](https://nodejs.org/) (versión 16 o superior recomendada).
+- [Ionic CLI](https://ionicframework.com/docs/intro/cli): `npm install -g @ionic/cli`.
+- Para móvil: Android Studio (con SDKs actualizados) o Xcode (macOS).
 
- - `development`
-   - angular cli
+---
 
+## 🚀 Instalación
+
+1. **Clonar el repositorio**:
    ```bash
-   npm run start
-   ```
-   - ionic cli
-
-   ```bash
-   ionic serve
+   git clone <URL_DEL_REPOSITORIO>
+   cd <NOMBRE_DEL_DIRECTORIO>
    ```
 
- - `production` 
+2. **Instalar dependencias**:
+   ```bash
+   npm install
+   ```
 
-  ```bash
-  npm run build:web
-  ````
+3. **Configurar SQLite para Web**:
+   El proyecto usa un archivo `.wasm` para que SQLite funcione en el navegador. Este se copia automáticamente al ejecutar los comandos de inicio.
 
-### Building Native Project with standard procedure
+---
 
-```bash
-npm run build:native
-npx cap sync
-npx cap copy
-```
+## 💻 Guía de Desarrollo (Paso a Paso)
 
-#### - Android
+### ¿Cómo añadir una nueva funcionalidad?
 
-```bash
-npx cap open android
-```
+Si quieres añadir una nueva tabla o funcionalidad:
+1. Crea un nuevo **Modelo** en `src/app/models/`.
+2. Crea un **Servicio** para esa entidad en `src/app/services/`.
+3. En el método de inicialización de tu servicio, añade el `CREATE TABLE` necesario.
+4. Llama a ese servicio desde el componente que necesites.
 
-Once Android Studio launches, make sure that you are using 
- - Gradle JDK version 11
- - Android Gradle Plugin Version 7.2.2
+---
 
-and build your app through the standard Android Studio workflow.
+## 🌐 Persistencia en la Web (WASM)
 
-#### - iOS
+A diferencia de las apps nativas donde SQLite escribe archivos directamente, en la web SQLite se ejecuta en memoria. Para no perder los datos al refrescar:
+- Se utiliza `sqliteConnection.initWebStore()`.
+- El servicio `TaskService` llama automáticamente a `saveToStore()` después de cada cambio (`INSERT`, `UPDATE`, `DELETE`).
+- Esto guarda el estado de la base de datos en el **IndexedDB** del navegador.
 
-```bash
-npx cap open ios
-```
+---
 
-Once Xcode launches, you can build your app through the standard Xcode workflow.
+## 📱 Despliegue en Android/iOS
 
+1. **Generar el build de producción**:
+   ```bash
+   npm run build:native
+   ```
 
-### Building Native Project with Ionic Cli
+2. **Sincronizar con Capacitor**:
+   ```bash
+   npx cap sync
+   ```
 
-#### - Android
+3. **Abrir en el IDE nativo**:
+   ```bash
+   # Para Android
+   npx cap open android
+   # Para iOS
+   npx cap open ios
+   ```
 
-```bash
-npm run ionic:android
-```
+---
 
-Once Android Studio launches, make sure that you are using 
- - Gradle JDK version 11
- - Android Gradle Plugin Version 7.2.2
+## 📜 Scripts Útiles
 
-and build your app through the standard Android Studio workflow.
+| Comando | Acción |
+| :--- | :--- |
+| `npm run start` | Arranca la aplicación en el navegador con soporte SQLite Web. |
+| `npm run build:web` | Compila la aplicación para despliegue web (PWA). |
+| `npm run build:native` | Prepara la aplicación eliminando archivos web innecesarios para nativo. |
+| `npm run lint` | Revisa el estilo de código del proyecto. |
 
-#### - iOS
+---
 
-```bash
-npm run ionic:ios
-```
+> [!TIP]
+> Si recibes un error en la web diciendo que `sql-wasm.wasm` no se encuentra, asegúrate de haber ejecutado `npm run start` o `npm install` recientemente, ya que esto dispara la copia de los drivers necesarios a `src/assets`.
 
-Once Xcode launches, you can build your app through the standard Xcode workflow.
-
-### Building Electron Project
-
-```bash
-npm run electron:start
-```
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<p align="center">
-  <a href="https://github.com/jepiqueau"><img src="https://github.com/jepiqueau.png?size=100" width="50" height="50" /></a>
-
-</p>
-
-<!-- markdownlint-enable -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
